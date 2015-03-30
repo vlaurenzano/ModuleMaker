@@ -1,0 +1,11 @@
+<frontend>      
+    <routers>
+        <packagemodule>
+            <use>standard</use>
+            <args>
+                <module>Package_Module</module>
+                <frontName>packagemodule</frontName>
+            </args>
+        </packagemodule>
+    </routers>
+</frontend>
