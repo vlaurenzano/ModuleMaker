@@ -119,7 +119,7 @@ class ModuleCreator {
      * @param $name
      */
     public function createModelPackage($name) {
-       $this->createModelConfigXml($name); 
+       $this->createModelConfigXml($name);        
        $this->createModel($name);
        $this->createResourceModel($name);
        $this->createCollectionModel($name);       
@@ -130,12 +130,10 @@ class ModuleCreator {
      * @param type $name
      */
     public function createModelConfigXml($name){
-        $xml = simplexml_load_file("{$this->moduleDir}/etc/config.xml");
-        
+        $xml = simplexml_load_file("{$this->moduleDir}/etc/config.xml");        
         if( !$xml ){
             exit( "Config xml does not exist, run create module or creat config xml first");
-        }
-        
+        }        
         $modelName = "{$this->magentoName}_Model";
         $resourceName = "{$this->lowercaseModuleName}_resource";
         $resourceClass = $modelName . '_Resource';
@@ -153,8 +151,8 @@ class ModuleCreator {
         $xml->global->resources->$setup->setup->class = 'Mage_Core_Model_Resource_Setup';  
         $xml->global->resources->$setup->connection->use = 'core_setup';  
         $xml->global->resources->$write->connection->use = 'core_write';
-        $xml->global->resources->$read->connection->use = 'core_read';
-        
+        $xml->global->resources->$read->connection->use = 'core_read';        
+        $this->createSetupDir();                
         $dom = new DOMDocument();
         $dom->preserveWhiteSpace = false;
         $dom->formatOutput = true;
@@ -164,15 +162,33 @@ class ModuleCreator {
     }
     
     /**
+     * Creates the setup dir
+     */
+    public function createSetupDir(){
+        $this->makeDirsIfNotExist(array(
+            "$this->moduleDir/sql",
+            "$this->moduleDir/sql/{$this->lowercaseModuleName}_setup",
+        ));
+    }
+    
+    
+    /**
      * Creates model file
      * @param type $name
      */
     public function createModel($name) {
         $nameParts = explode("_", $name);
         $dirs = array( "{$this->moduleDir}/Model" );
-        $lastName = array_pop( $nameParts );
+        $lastName = array_pop( $nameParts );        
+        $last = '';
         foreach( $nameParts as $n ){
-            $dirs[] = "{$this->moduleDir}/Model/" . $n;
+            if( !$last ){
+                $dirs[] = "{$this->moduleDir}/Model/" . $n;
+                $last = "{$this->moduleDir}/Model/" . $n;
+            } else {
+                $dirs[] = $last . "/" . $n;
+                $last .= "/$n";
+            }            
         }
         $this->makeDirsIfNotExist($dirs);
         $template = str_replace(
@@ -199,8 +215,15 @@ class ModuleCreator {
         $nameParts = explode("_", $name);
         $dirs = array( "{$this->moduleDir}/Model", "{$this->moduleDir}/Model/Resource" );
         $lastName = array_pop( $nameParts );
+        $last = '';
         foreach( $nameParts as $n ){
-            $dirs[] = "{$this->moduleDir}/Model/Resource/" . $n;
+             if( !$last ){
+                $dirs[] = "{$this->moduleDir}/Model/Resource/" . $n;
+                $last = "{$this->moduleDir}/Model/Resource/" . $n;
+            } else {
+                $dirs[] = $last . "/" . $n;
+                $last .= "/$n";
+            }                        
         }
         $this->makeDirsIfNotExist($dirs);
         $template = str_replace(
